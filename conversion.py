@@ -72,7 +72,6 @@ def convert_image(source_path,destination_path,num_rows,num_cols,resize,horizont
         print(str(files_processed) + ' files processed out of ' + str(num_files) + ' files.')
         files_processed += 1
         # Take an image in name folder and open it
-        # Then resize the image to N x N
         image = Image.open(path[0] + '\\' + file)
         # Try averaging over colored image
         try:
@@ -95,7 +94,8 @@ def convert_image(source_path,destination_path,num_rows,num_cols,resize,horizont
         # Rotation
         if rotate_image == True:
             image = image.rotate(degree)
-        # Resizing 
+        # Resizing
+        # Then resize the image to num_rows x num_cols
         if resize == True:
             image = image.resize((num_rows,num_cols))
         # Gaussian Noise

@@ -1,14 +1,17 @@
 '''
 Python Script written by Anthony Nguyen
-Usage:
+
+Usage: Make sure to comment function not used in {convert_image,list_unique_x_ray}
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+    
+How to Run function convert_image
 
 WARNING: Be sure to change source_path and destination_path below - To find path, use os.getcwd() from os
 WARNING1: Be sure that the source_path contains all images and destination_path be an empty folder  
 The python script takes all the images in source_path and converts them to num_rows x num_cols and saves them in destination_path
 
 Parameter: The resulting size of the image num_rows x num_cols
-
-How to Run: 
     
 WARNING: 1 conversion type at a time
     
@@ -46,6 +49,21 @@ train_destination_path = path where resized training images are to be saved
 test_path = path containing all testing images
 test_destination_path = path where resized test images are to be saved
 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+How to Run function list_unique_x_ray
+
+NOTE: Colored images are automatically averaged across RGB channel and converted to gray scale.
+
+Input names:  
+    
+    source_path: Path to take images
+    destination_path: Path to save unique patients' x-ray
+    rng: If True (set viral to False), randomly pick one x-ray from each patient and add to destination_path.
+    viral: If True (set rng to False), pick the first viral observed from each patient and add to destination_path. If a viral x-ray does not exist, take a bacterial x-ray.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 '''
 
 # Import libraries
@@ -53,6 +71,7 @@ import numpy as np
 import os
 from PIL import Image
 from PIL import ImageOps
+import random
 
 # Function that resize all images in source_path to dimension num_rows by num_cols and saves them in destination_path 
 def convert_image(source_path,destination_path,num_rows,num_cols,resize,horizontal_reflection,rotate_image,degree,gauss_noise,mean,std_dev,shear_horizontal,horizontal_factor,shear_vertical,vertical_factor,zero_padding,padding_dim):
@@ -127,6 +146,90 @@ def convert_image(source_path,destination_path,num_rows,num_cols,resize,horizont
     if resize == True:
         print('\nYour images are resized at ' + str(num_rows) + ' by ' + str(num_cols) + ' and are in the path ' + destination_path)
     
+def list_unique_x_ray(source_path,destination_path,rng,viral):
+
+    list_files = os.listdir(source_path)
+    
+    # get files with string 'person' in the file 
+    list_files_person = []
+    for file in list_files:
+        if 'person' in file:
+            list_files_person.append(file)
+    
+    person_string = 'person'
+    index = len('person')    
+    
+    # Append 1 x-ray per patient in list_unique_person_files
+    list_unique_person_files = []
+    person_x_rays = []
+    for file in list_files_person:
+        
+        # Get Patient ID 
+        stack = person_string
+        j = index
+        while file[j] != '_':
+            stack += file[j]
+            j += 1
+        # Append x-ray corresponding to patient
+        if not person_x_rays:
+            person_x_rays.append(file)
+        else:
+            # check if current x-ray corresponds to the previous checked patient
+            # If so, take an x-ray from the previously checked patient and push file in empty stack
+            if stack in person_x_rays[-1]:
+                person_x_rays.append(file)
+            else:
+                if rng:
+                    # Randomly pick an xray from a person
+                    random_index = random.randint(0,len(person_x_rays)-1)
+                    list_unique_person_files.append(person_x_rays[random_index])
+                if viral:
+                    # Append the first virus x-ray coresponding to a patient. If not found, take a bacterial x-ray.
+                    virus_count = 0
+                    for item in person_x_rays:                       
+                        if 'virus' in item:
+                            virus_count += 1
+                            list_unique_person_files.append(item)
+                            break
+                    if virus_count == 0:
+                        list_unique_person_files.append(person_x_rays[0])                    
+                # clear list to load x-rays for the next person
+                person_x_rays = []
+                # append file in person_x_rays
+                person_x_rays.append(file)
+                
+    path = [source_path,destination_path]
+    
+    # Number of files in source path
+    num_files = len(list_unique_person_files)   
+
+    # Counter for files processed
+    files_processed = 1    
+    
+    # Iterate over all the images, perform averaging over the RGB channels, rescale to N x N, and save image in destination    
+    for file in list_unique_person_files:
+        print(str(files_processed) + ' files processed out of ' + str(num_files) + ' files.')
+        files_processed += 1
+        # Take an image in name folder and open it
+        image = Image.open(path[0] + '\\' + file)
+        # Try averaging over colored image
+        try:
+            # Averaging images over RGB channels
+            image_array = np.array(image)
+            image_average = np.zeros((np.shape(image_array)[0],np.shape(image_array)[1]))
+            for i in range(3):
+                image_average += image_array[:,:,i]
+            image_average /= 3
+                
+            # Preprocessing so every image is in the format 0-255 by np.uint8
+            image_average = image_average.astype(np.uint8)
+            image = Image.fromarray(image_average)
+        # Gray scale images    
+        except IndexError: 
+            pass
+        image.save(path[1] + '\\' + file,'JPEG')
+        
+    
 # Specify paths
     
 train_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\train'
@@ -135,4 +238,7 @@ test_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-che
 test_destination_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\test_modified'
 
 # Run the image conversion
-convert_image(train_path,train_destination_path,1000,500,False,False,False,10,False,50,1,False,0.2,False,0.2,False,2500)
+#convert_image(train_path,train_destination_path,1000,500,False,False,False,10,False,50,1,False,0.2,False,0.2,False,2500)
+
+# Extract Unique x-rays from source_path to destination_path
+list_unique_x_ray(train_path,train_destination_path,False,True)

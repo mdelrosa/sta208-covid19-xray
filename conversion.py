@@ -41,7 +41,7 @@ vertical_factor: If shear_vertical is set to True, vertically shear images by fa
 zero_padding: If set to True, pad the images by zeros and resulting image is padding_dim by padding_dim
 padding_dim: If zero_padding is set to True, the padding images are dimension padding_dim by padding_dim
 
-aspect: If set to True, rescale image while preserving aspect ratio. Resulting image with largest dimension is 'dimesnion'
+aspect: If set to True, rescale image while preserving aspect ratio. Resulting image with largest dimension is 'dimension'
 dimension: If aspect is set to True, rescale image while preserving aspect ratio. Resulting image with largest dimension is 'dimension' while the smaller dimension may be strictly smaller than 'dimension'
 
 Pick exactly one (1) pair below: source_path in [train_path,test_path] and destination_path in [train_destination_path,test_destination_path]
@@ -115,7 +115,7 @@ def convert_image(source_path,destination_path,num_rows,num_cols,resize,horizont
             List = image.size
             index_max = List.index(max(List))
             index_min = List.index(min(List))
-            aspect_ratio = int(List[index_max] / List[index_min])
+            aspect_ratio = List[index_max] / List[index_min]
             if index_max == 1:
                 image = image.resize((int(dimension/ aspect_ratio),dimension))
             else:
@@ -251,7 +251,7 @@ test_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-che
 test_destination_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\test_modified'
 
 # Run the image conversion
-convert_image(test_path,test_destination_path,1000,500,False,False,False,10,False,50,1,False,0.2,False,0.2,True,600,True,595)
+convert_image(train_path,train_destination_path,1000,500,False,False,False,10,False,50,1,False,0.2,False,0.2,True,600,True,595)
 
 # Extract Unique x-rays from source_path to destination_path
 #list_unique_x_ray(train_path,train_destination_path,False,True)

@@ -64,6 +64,7 @@ Input names:
     destination_path: Path to save unique patients' x-ray
     rng: If True (set viral to False), randomly pick one x-ray from each patient and add to destination_path.
     viral: If True (set rng to False), pick the first viral observed from each patient and add to destination_path. If a viral x-ray does not exist, take a bacterial x-ray.
+    normal_rng: If True, randomly pick exactly 1 x-ray from each patient
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -159,9 +160,11 @@ def convert_image(source_path,destination_path,num_rows,num_cols,resize,horizont
     if resize == True:
         print('\nYour images are resized at ' + str(num_rows) + ' by ' + str(num_cols) + ' and are in the path ' + destination_path)
     
-def list_unique_x_ray(source_path,destination_path,rng,viral):
+def list_unique_x_ray(source_path,destination_path,rng,viral,normal_rng):
 
     list_files = os.listdir(source_path)
+    
+    # Process Unique x-rays from infected patients
     
     # get files with string 'person' in the file 
     list_files_person = []
@@ -213,9 +216,76 @@ def list_unique_x_ray(source_path,destination_path,rng,viral):
                 
     path = [source_path,destination_path]
     
+    # Process Unique x-rays from normal patients
+    
+    # Stack holds x-rays from a given patient
+    stack_normal_patient = []
+    
+    # Sort x-ray to an existing patient or clear stack and push x-ray in stack
+    for file in list_files:
+        
+        # If stack is empty, push x-ray in stack
+        if 'IM' in file and stack_normal_patient == []:
+            stack_normal_patient.append(file)
+            
+            # If stack is empty andat the last file
+            if file == list_files[-1]:
+                list_unique_person_files.append(file)
+            continue
+        
+        # If x-ray is valid
+        if 'IM' in file:
+            
+            # If x-ray has string 'NORMAL', push it in the stack if it corresponds to the other x-rays in the stack or clear stack and push x-ray in stack
+            if 'NORMAL2' in file:
+                file_name = file.split('.')
+                file_name.pop()
+                file_name = '-'.join(file_name)
+                file_name = file_name.split('-')
+                file_name.pop(0)
+                file_name.pop(0)
+                if len(file_name) == 3:
+                    file_name.pop()
+                file_name = '-'.join(file_name)
+                if file_name in stack_normal_patient[0]:
+                    stack_normal_patient.append(file)
+                else:
+                    # If normal_rng == True, randomly pick an x-ray in stack_normal_patient and append to list_unique_person_files
+                    if normal_rng:
+                        list_unique_person_files.append(stack_normal_patient[random.randint(0,len(stack_normal_patient)-1)])
+                    else:
+                        list_unique_person_files.append(stack_normal_patient[0])
+                    stack_normal_patient = []
+                    stack_normal_patient.append(file)
+            
+            # Push in stack if x-ray corresponds to other x-rays in the stack or clear stack and push in stack
+            else:
+                file_name = file.split('.')
+                file_name.pop()
+                file_name = '-'.join(file_name)
+                file_name = file_name.split('-')
+                #file_name.pop(0)
+                file_name.pop(0)
+                if len(file_name) == 3:
+                    file_name.pop()
+                file_name = '-'.join(file_name)
+                if file_name in stack_normal_patient[0]:
+                    stack_normal_patient.append(file)
+                else:
+                    # If normal_rng == True, randomly pick an x-ray in stack_normal_patient and append to list_unique_person_files
+                    if normal_rng:
+                        list_unique_person_files.append(stack_normal_patient[random.randint(0,len(stack_normal_patient)-1)])
+                    else:
+                        list_unique_person_files.append(stack_normal_patient[0])
+                    stack_normal_patient = []
+                    stack_normal_patient.append(file)
+                
+                   
+    
     # Number of files in source path
     num_files = len(list_unique_person_files)   
-
+    
+    
     # Counter for files processed
     files_processed = 1    
     
@@ -251,7 +321,7 @@ test_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-che
 test_destination_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\test_modified'
 
 # Run the image conversion
-convert_image(train_path,train_destination_path,1000,500,False,False,False,10,False,50,1,False,0.2,False,0.2,True,600,True,595)
+#convert_image(train_path,train_destination_path,1000,500,False,False,False,10,False,50,1,False,0.2,False,0.2,True,600,True,595)
 
 # Extract Unique x-rays from source_path to destination_path
-#list_unique_x_ray(train_path,train_destination_path,False,True)
+list_unique_x_ray(test_path,test_destination_path,True,False,True)

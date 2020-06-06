@@ -159,15 +159,16 @@ def convert_image(source_path,destination_path,num_rows,num_cols,resize,horizont
     if resize == True:
         print('\nYour images are resized at ' + str(num_rows) + ' by ' + str(num_cols) + ' and are in the path ' + destination_path)
     
-def list_unique_x_ray(source_path,destination_path,rng,viral):
+def list_unique_x_ray(source_path,destination_path,rng,viral,print_every=100):
 
     list_files = os.listdir(source_path)
     
     # get files with string 'person' in the file 
     list_files_person = []
     for file in list_files:
-        if 'person' in file:
+        if ('person' in file) or ('IM' in file) or ('NORMAL' in file):
             list_files_person.append(file)
+            
     
     person_string = 'person'
     index = len('person')    
@@ -219,12 +220,14 @@ def list_unique_x_ray(source_path,destination_path,rng,viral):
     # Counter for files processed
     files_processed = 1    
     
-    # Iterate over all the images, perform averaging over the RGB channels, rescale to N x N, and save image in destination    
+    # Iterate over all the images, perform averaging over the RGB channels, rescale to N x N, and save image in destination 
+    print("--- Processing of unique {} files ---".format(num_files))
     for file in list_unique_person_files:
-        print(str(files_processed) + ' files processed out of ' + str(num_files) + ' files.')
+        if files_processed % print_every == 0:
+            print(str(files_processed) + ' files processed out of ' + str(num_files) + ' files.')
         files_processed += 1
         # Take an image in name folder and open it
-        image = Image.open(path[0] + '\\' + file)
+        image = Image.open(path[0] + os.path.sep + file)
         # Try averaging over colored image
         try:
             # Averaging images over RGB channels
@@ -240,18 +243,18 @@ def list_unique_x_ray(source_path,destination_path,rng,viral):
         # Gray scale images    
         except IndexError: 
             pass
-        image.save(path[1] + '\\' + file,'JPEG')
+        image.save(path[1] + os.path.sep + file,'JPEG')
         
     
 # Specify paths
-    
-train_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\train'
-train_destination_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\train_modified'
-test_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\test'
-test_destination_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\test_modified'
+if __name__ == "__main__":
+    train_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\train'
+    train_destination_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\train_modified'
+    test_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\test'
+    test_destination_path = 'C:\\Users\\Tony Nguyen\\Desktop\\Coronahack_STAT208\\coronahack-chest-xraydataset\\Coronahack-Chest-XRay-Dataset\\Coronahack-Chest-XRay-Dataset\\test_modified'
 
-# Run the image conversion
-convert_image(train_path,train_destination_path,1000,500,False,False,False,10,False,50,1,False,0.2,False,0.2,True,600,True,595)
+    # Run the image conversion
+    convert_image(train_path,train_destination_path,1000,500,False,False,False,10,False,50,1,False,0.2,False,0.2,True,600,True,595)
 
-# Extract Unique x-rays from source_path to destination_path
-#list_unique_x_ray(train_path,train_destination_path,False,True)
+    # Extract Unique x-rays from source_path to destination_path
+    #list_unique_x_ray(train_path,train_destination_path,False,True)

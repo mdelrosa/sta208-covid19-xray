@@ -182,8 +182,9 @@ def list_unique_x_ray(source_path,destination_path,rng,viral,normal_rng):
     # get files with string 'person' in the file 
     list_files_person = []
     for file in list_files:
-        if 'person' in file:
+        if ('person' in file) or ('IM' in file) or ('NORMAL' in file):
             list_files_person.append(file)
+            
     
     person_string = 'person'
     index = len('person')    
@@ -302,12 +303,14 @@ def list_unique_x_ray(source_path,destination_path,rng,viral,normal_rng):
     # Counter for files processed
     files_processed = 1    
     
-    # Iterate over all the images, perform averaging over the RGB channels, rescale to N x N, and save image in destination    
+    # Iterate over all the images, perform averaging over the RGB channels, rescale to N x N, and save image in destination 
+    print("--- Processing of unique {} files ---".format(num_files))
     for file in list_unique_person_files:
-        print(str(files_processed) + ' files processed out of ' + str(num_files) + ' files.')
+        if files_processed % print_every == 0:
+            print(str(files_processed) + ' files processed out of ' + str(num_files) + ' files.')
         files_processed += 1
         # Take an image in name folder and open it
-        image = Image.open(path[0] + '\\' + file)
+        image = Image.open(path[0] + os.path.sep + file)
         # Try averaging over colored image
         try:
             # Averaging images over RGB channels
@@ -323,7 +326,7 @@ def list_unique_x_ray(source_path,destination_path,rng,viral,normal_rng):
         # Gray scale images    
         except IndexError: 
             pass
-        image.save(path[1] + '\\' + file,'JPEG')
+        image.save(path[1] + os.path.sep + file,'JPEG')
      
 def get_target_paths(base_path):
     train_path = f'{base_path}\\train'
@@ -331,6 +334,7 @@ def get_target_paths(base_path):
     test_path = f'{base_path}\\test'
     test_dest = f'{base_path}\\test_modified'
     return [train_path, train_dest, test_path, test_dest]        
+
         
 def check_target_paths(target_paths, label_names):
     for path in target_paths:
@@ -357,3 +361,4 @@ if (__name__ == "__main__"):
     
     # Extract Unique x-rays from source_path to destination_path
     list_unique_x_ray(test_path,test_destination_path,True,False,True)
+

@@ -54,6 +54,30 @@ def prepare_for_training(ds, cache=True, shuffle_buffer_size=500, BATCH_SIZE=16,
         ds = ds.prefetch(buffer_size=AUTOTUNE)
 
         return ds
+
+def prepare_dataset(ds, cache=True, shuffle_buffer_size=1000, testing_bool=True, AUTOTUNE=None):
+    """
+    Similar utility to prepare_for_training. Decrease batch_size to one.
+    """
+    if cache:
+        if isinstance(cache, str):
+            ds = ds.cache(cache)
+        else:
+            ds = ds.cache()
+        # add optional shuffle - for testing, we do not want shuffling
+        if not testing_bool:
+            ds = ds.shuffle(buffer_size=shuffle_buffer_size)
+            # Repeat forever
+            ds = ds.repeat()
+            ds = ds.batch(BATCH_SIZE)
+        else:
+            ds = ds.repeat() # two passes so we can scrape labels
+            ds = ds.batch(1)
+        # `prefetch` lets the dataset fetch batches in the background while the model
+        # is training.
+        ds = ds.prefetch(buffer_size=AUTOTUNE)
+
+        return ds
     
 def show_batch(image_batch, label_batch, BATCH_SIZE):
     """

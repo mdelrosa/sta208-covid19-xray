@@ -44,6 +44,9 @@ padding_dim: If zero_padding is set to True, the padding images are dimension pa
 aspect: If set to True, rescale image while preserving aspect ratio. Resulting image with largest dimension is 'dimension'
 dimension: If aspect is set to True, rescale image while preserving aspect ratio. Resulting image with largest dimension is 'dimension' while the smaller dimension may be strictly smaller than 'dimension'
 
+label_dict: This is a dictionary of labels used by our Jupyter notebooks.
+print_every=100: Printing related task in preprocessing.
+
 Pick exactly one (1) pair below: source_path in [train_path,test_path] and destination_path in [train_destination_path,test_destination_path]
 
 train_path = path containing all training images

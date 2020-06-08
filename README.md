@@ -8,14 +8,18 @@ Initially, we will treat infection detection as a binary classification problem,
 
 ## Outline
 
-The final report is available at [`final-report.ipynb`](final-report.ipynb). The other notebooks in this repo are categorized as follows:
+The final report is available at [`final-report.ipynb`](final-report.ipynb). There are some html code in this notebook, so open and view this on Jupityer Notebook. The other notebooks in this repo are categorized as follows:
 
 - EDA
     - `eda.ipynb` - Show distribution of X-ray images, parse metadata.
 - Preprocessing
     - `get-unique` - Extract X-rays from unique patients.
 - HOG/SVM
-    - ``
+    - `HOG-sim1.ipynb`
+    - `HOG-sim2.ipynb`
+    - `HOG-sim3.ipynb`
+    - `HOG-sim4.ipynb`
+    - `HOG-sim5.ipynb`
 - ResNet50
     - `train-resnet.ipynb` - Train ResNet50 on unique images.
     - `test-resnet.ipynb` - Test ResNet50 using ROC curves, PR curves, and confusion matrices. 
